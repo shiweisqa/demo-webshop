@@ -259,27 +259,44 @@ if (document.readyState !== 'loading') {
 
 function renderBasketIndicator() {
   const basket = getBasket();
-  let indicator = document.querySelector(".basket-indicator");
-  if (!indicator) {
-    const basketLink = document.querySelector(".basket-link");
-    if (!basketLink) return;
-    indicator = document.createElement("span");
-    indicator.className = "basket-indicator";
-    basketLink.appendChild(indicator);
+  const badge = document.getElementById('basketBadge');
+  const basketLink = document.getElementById('nav-basket') || document.querySelector('.basket-link');
+  if (badge) {
+    badge.textContent = basket.length;
+    badge.style.display = basket.length > 0 ? 'inline-flex' : 'none';
+  } else if (basketLink) {
+    // fallback: ensure an accessible label on the link
+    basketLink.setAttribute('aria-label', `Basket, ${basket.length} items`);
   }
-  if (basket.length > 0) {
-    indicator.textContent = basket.length;
-    indicator.style.display = "flex";
+  if (basketLink) {
+    basketLink.setAttribute('aria-label', `Basket, ${basket.length} ${basket.length === 1 ? 'item' : 'items'}`);
+  }
+}
+
+function setActiveNav() {
+  const productsLink = document.getElementById('nav-products');
+  const basketLink = document.getElementById('nav-basket');
+  // determine page from pathname
+  const path = window.location.pathname.split('/').pop();
+  const page = path === '' ? 'index.html' : path;
+  if (productsLink) productsLink.removeAttribute('aria-current');
+  if (basketLink) basketLink.removeAttribute('aria-current');
+  if (page === 'basket.html') {
+    if (basketLink) basketLink.setAttribute('aria-current', 'page');
   } else {
-    indicator.style.display = "none";
+    if (productsLink) productsLink.setAttribute('aria-current', 'page');
   }
 }
 
 // Call this on page load and after basket changes
 if (document.readyState !== "loading") {
   renderBasketIndicator();
+  setActiveNav();
 } else {
-  document.addEventListener("DOMContentLoaded", renderBasketIndicator);
+  document.addEventListener("DOMContentLoaded", function () {
+    renderBasketIndicator();
+    setActiveNav();
+  });
 }
 
 // Toast/snackbar implementation
