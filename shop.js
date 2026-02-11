@@ -111,10 +111,18 @@ function escapeHtml(s) {
 function removeBasketItem(index) {
   const basket = getBasket();
   if (index < 0 || index >= basket.length) return;
+  const prev = JSON.parse(JSON.stringify(basket));
+  const removed = basket[index];
   basket.splice(index, 1);
   localStorage.setItem("basket", JSON.stringify(basket));
   renderBasket();
   renderBasketIndicator();
+  const name = (removed && removed.requested) ? removed.name : (PRODUCTS[removed] && PRODUCTS[removed].name) || String(removed);
+  showToast(`${name} removed from basket`, 'Undo', function () {
+    localStorage.setItem("basket", JSON.stringify(prev));
+    renderBasket();
+    renderBasketIndicator();
+  });
 }
 
 function updateBasketItem(index, newItem) {
@@ -274,14 +282,89 @@ if (document.readyState !== "loading") {
   document.addEventListener("DOMContentLoaded", renderBasketIndicator);
 }
 
-// Patch basket functions to update indicator
+// Toast/snackbar implementation
+let _toastTimer = null;
+let _currentUndo = null;
+function showToast(message, actionLabel, onUndo) {
+  // ensure container
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  // clear existing
+  container.innerHTML = '';
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.innerHTML = `
+    <div class="toast-message">${escapeHtml(message)}</div>
+    <div class="toast-actions">
+      ${actionLabel ? `<button class="toast-undo" aria-label="Undo last basket action">${escapeHtml(actionLabel)}</button>` : ''}
+      <button class="toast-dismiss" aria-label="Dismiss notification">×</button>
+    </div>`;
+  container.appendChild(toast);
+
+  const undoBtn = toast.querySelector('.toast-undo');
+  const dismissBtn = toast.querySelector('.toast-dismiss');
+
+  function clean() {
+    if (container) container.innerHTML = '';
+    if (_toastTimer) { clearTimeout(_toastTimer); _toastTimer = null; }
+    _currentUndo = null;
+  }
+
+  if (undoBtn) {
+    undoBtn.addEventListener('click', function () {
+      if (typeof onUndo === 'function') onUndo();
+      clean();
+    });
+  }
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function () {
+      clean();
+    });
+  }
+
+  // pause timer on interaction
+  toast.addEventListener('mouseenter', function () { if (_toastTimer) clearTimeout(_toastTimer); });
+  toast.addEventListener('mouseleave', function () { _toastTimer = setTimeout(clean, 4000); });
+  if (undoBtn) undoBtn.addEventListener('focus', function () { if (_toastTimer) clearTimeout(_toastTimer); });
+  if (dismissBtn) dismissBtn.addEventListener('focus', function () { if (_toastTimer) clearTimeout(_toastTimer); });
+
+  _currentUndo = onUndo;
+  _toastTimer = setTimeout(function () { clean(); }, 4000);
+}
+
+// Patch basket functions to update indicator and show toast with undo
 const origAddToBasket = window.addToBasket;
 window.addToBasket = function (product) {
+  const prev = getBasket();
+  const prevCopy = JSON.parse(JSON.stringify(prev));
   origAddToBasket(product);
   renderBasketIndicator();
+  renderBasket();
+  const name = (product && product.requested) ? product.name : (PRODUCTS[product] && PRODUCTS[product].name) || String(product);
+  showToast(`${name} added to basket`, 'Undo', function () {
+    localStorage.setItem('basket', JSON.stringify(prevCopy));
+    renderBasket();
+    renderBasketIndicator();
+  });
 };
+
 const origClearBasket = window.clearBasket;
 window.clearBasket = function () {
+  const prev = getBasket();
+  const prevCopy = JSON.parse(JSON.stringify(prev));
   origClearBasket();
   renderBasketIndicator();
+  renderBasket();
+  showToast(`Basket cleared`, 'Undo', function () {
+    localStorage.setItem('basket', JSON.stringify(prevCopy));
+    renderBasket();
+    renderBasketIndicator();
+  });
 };
