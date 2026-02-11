@@ -353,3 +353,45 @@ footer a {
   color: green;
   margin-top: 1rem;
 }
+
+/* Request product modal and floating button */
+.floating-request-btn {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 9999;
+  background: #0077ff;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.8rem 1rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  border: none;
+  font-weight: 700;
+}
+.request-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10,10,10,0.35);
+  z-index: 10000;
+}
+.request-modal.open { display:flex; }
+.request-modal-inner {
+  width: 420px;
+  background: #fff;
+  padding: 1.4rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+.requested-item {
+  background: linear-gradient(90deg, #fffdf6 0%, #f7fbff 100%);
+  border: 1px dashed #e0cfa8;
+}
+.requested-name { font-weight: 700; margin-left: 0.4rem; }
+.requested-desc { color: #555; font-style: italic; margin-top: 0.3rem; }
+.requested-notice { color: #a35d00; font-size: 0.95rem; margin-top: 0.4rem; }
+.order-item-actions { margin-top: 0.6rem; display:flex; gap:8px; }
+.order-item-actions button { padding: 0.4rem 0.8rem; font-size: 0.95rem; }
+.request-link a { color: #0077ff; text-decoration: underline; }
