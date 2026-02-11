@@ -8,27 +8,17 @@
   </head>
   <body>
     <header role="banner">
-      <div class="header-center">
-        <a href="index.html" class="logo" aria-label="Go to homepage">
-          <img
-            src="img/fruit-shop-logo.png"
-            class="logo-img"
-            alt="Fruit Shop Logo"
-          />
-          <span class="products-text"> View Products </span>
+      <div class="top-nav">
+        <a href="index.html" class="logo" aria-label="Go to Products">
+          <img src="img/fruit-shop-logo.png" class="logo-img" alt="Fruit Shop Logo" />
+          <span class="app-title">Fruit Shop</span>
         </a>
-        <nav role="navigation" aria-label="Main navigation">
-          <a
-            href="basket.html"
-            class="basket-link"
-            aria-label="View shopping basket"
-          >
-            <img
-              src="img/basket-icon.png"
-              class="basket-img"
-              alt="Shopping basket icon"
-            />
-            <span class="basket-text">View shopping basket</span>
+        <nav class="primary-nav" aria-label="Primary">
+          <a href="index.html" class="nav-link" id="nav-products">Products</a>
+          <a href="basket.html" class="nav-link basket-link" id="nav-basket" aria-label="View shopping basket">
+            <img src="img/basket-icon.png" class="basket-icon" alt="" aria-hidden="true" />
+            <span class="basket-text">Basket</span>
+            <span id="basketBadge" class="basket-badge" aria-live="polite" aria-atomic="true">0</span>
           </a>
         </nav>
       </div>
